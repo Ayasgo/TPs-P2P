@@ -1,0 +1,37 @@
+Pardon, madam mais comme je deteste java et jee j'ai réalier ce TP en utilisant python:
+
+Extension 1 : (donne moi cela comme titre : Refaire l’application développée précédemment en utilisant une base de données MySQL pour
+stocker et consulter les gains de la loterie des utilisateurs en se basant sur la technologie JDBC. )
+
+voici le code du formulaire :
+<img > :form.png
+
+voici le code du python - app.py:
+Ce fichier remplace la classe GreetingServlet et la configuration web.xml.
+<img > :code1.png
+
+voici le code du db - db.py:
+Python a SQLite intégré. Pas besoin d'installer un serveur MySQL lourd pour un TP.
+<img > :code2.png
+
+Extension 2 : (donne moi cela comme titre : Refaire l’application pour empêcher un utilisateur d’accéder aux services de l’application (c'està-dire, la servlet) si l’utilisateur ne possède pas le rôle "tomcat". )
+voici le code du python:
+Voici comment créer un décorateur pour bloquer une les utilisateurs sans le role 'tomcat' :
+<img > :code3.png
+
+Extension 3 : Sécurité et Blacklist (Filtres)
+En Java EE, on utilise des Filter. En Python Flask, on utilise des Décorateurs.
+
+Voici comment créer un décorateur pour bloquer une liste noire (Blacklist) :
+<img > :code4.png
+
+Extension 4 : Utiliser JSP (Templates)
+L'instruction demande de ne plus écrire le HTML dans le code Java (ici Python). Flask utilise le moteur de template Jinja2.
+On Crée un fichier templates/resultat.html :
+<img > :code5.png
+On Modifie la fonction Python pour utiliser render_template :
+<img > :code6.png
+
+Extension 6 : Gestion des erreurs (404, 500)
+C'est l'équivalent de la config error-page dans web.xml.
+<img > :code7.png
