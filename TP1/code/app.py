@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template
-from db import init_db
+from TP1.code.db import init_db
 import sqlite3
 import random
 
