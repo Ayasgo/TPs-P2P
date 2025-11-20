@@ -1,0 +1,16 @@
+\babel@toc {french}{}\relax 
+\contentsline {chapter}{Introduction}{2}{chapter*.2}%
+\contentsline {chapter}{\numberline {1}Réalisation des Extensions}{3}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Intégration d’une Base de Données SQLite dans l’Application Flask}{3}{section.1.1}%
+\contentsline {section}{\numberline {1.2}}{7}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Sécurité et Blacklist (Filtres)}{7}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Utiliser JSP (Templates)}{9}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Gestion des erreurs (404, 500)}{10}{section.1.5}%
+\contentsline {chapter}{\numberline {2}Synthèse des Concepts : Architecture Web et Protocole HTTP}{11}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Le Modèle Client-Serveur et le Cycle de Vie HTTP}{11}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Le Contrôleur : Routage et Traitement (Servlets vs Routes)}{11}{section.2.2}%
+\contentsline {section}{\numberline {2.3}La Vue : Génération de Contenu Dynamique (JSP vs Jinja2)}{12}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Le Modèle : Persistance des Données (JDBC vs SQLite)}{12}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Middleware et Aspect-Oriented Programming (Filtres vs Décorateurs)}{12}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Gestion des Erreurs HTTP}{12}{section.2.6}%
+\contentsline {chapter}{Conclusion}{14}{chapter*.3}%

@@ -80,7 +80,7 @@ Cette approche permet de reproduire fidèlement l'architecture demandée tout en
 %===========================================================
 % EXTENSION 1
 %===========================================================
-\section{Refaire l’application développée précédemment en utilisant une base de données MySQL pour stocker et consulter les gains de la loterie des utilisateurs en se basant sur la technologie JDBC}
+\section{Intégration d’une Base de Données SQLite dans l’Application Flask}
 
 Pour cette extension, nous avons remplacé la technologie JDBC (Java Database Connectivity) par le module \texttt{sqlite3} natif de Python. SQLite a été choisi pour sa légèreté, évitant l'installation d'un serveur lourd comme MySQL pour un environnement de TP, tout en respectant la logique SQL standard.
 
@@ -116,7 +116,7 @@ Python intègre SQLite par défaut. Ce module gère la persistance des données 
 %===========================================================
 % EXTENSION 2
 %===========================================================
-\section{Refaire l’application pour empêcher un utilisateur d’accéder aux services de l’application si l’utilisateur ne possède pas le rôle "tomcat"}
+\section{Mise en Place d’un Système de Rôles et de Restrictions d’Accès}
 
 Pour restreindre l'accès, nous utilisons le concept de \textbf{Décorateur} en Python. C'est l'équivalent fonctionnel des mécanismes de sécurité basés sur les rôles dans le conteneur de servlets.
 
