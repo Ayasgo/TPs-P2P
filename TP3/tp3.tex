@@ -1,0 +1,231 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+
+% Configuration des marges
+\geometry{hmargin=2.5cm,vmargin=2.5cm}
+
+% Couleurs pour le code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{jsstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=jsstyle}
+
+% En-têtes
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textbf{INE3 : Communication Multimédia}}
+\rhead{Rapport TP3 : WebRTC}
+\cfoot{\thepage}
+
+\begin{document}
+
+%===========================================================
+% PAGE DE GARDE
+%===========================================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    \includegraphics[width=0.4\textwidth]{imgs/logo_inpt.png} 
+    \vspace{2cm}
+    
+    {\Large \textbf{Institut National des Postes et Télécommunications}}\\[1.5cm]
+    
+    {\Large \textbf{Module : Communication Multimédia P2P en temps réel}}\\[0.5cm]
+    {\huge \textbf{Rapport de TP3 : La Plateforme WebRTC}}\\[0.5cm]
+    {\large \textit{Implémentation d'un système de Visioconférence et Chat P2P}}\\[2cm]
+    
+    \textbf{Réalisé par :}\\
+    Aymane ASKRI\\[2cm]
+    
+    \textbf{Encadré par :}\\
+    Asmae ELHAMZAOUI\\[2cm]
+    
+    \vfill
+    {\large Année Universitaire : 2025-2026}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%===========================================================
+% INTRODUCTION
+%===========================================================
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+L'évolution du web vers des applications riches et interactives a rendu nécessaire la communication en temps réel sans plugins tiers (comme Flash par le passé). **WebRTC** (Web Real-Time Communication) est la réponse standardisée à ce besoin, permettant l'échange de flux audio, vidéo et de données arbitraires directement entre navigateurs (Peer-to-Peer).
+
+L'objectif de ce TP est de concevoir une application complète intégrant :
+\begin{itemize}
+    \item La capture des flux multimédias (Caméra/Micro).
+    \item Un canal de signalisation pour la découverte des pairs (via NodeJS).
+    \item L'établissement d'une connexion P2P pour le streaming vidéo.
+    \item L'utilisation de \texttt{RTCDataChannel} pour un chat textuel sécurisé et rapide.
+\end{itemize}
+
+Ce rapport détaille l'architecture technique, l'implémentation des mécanismes de signalisation SDP/ICE, et explore les extensions possibles vers des systèmes de vidéoconférence multipartites.
+
+\chapter{Architecture et Concepts Théoriques}
+
+\section{Le besoin de Signalisation}
+Bien que WebRTC soit une technologie P2P, deux navigateurs ne peuvent pas se connecter directement "par magie". Ils ne connaissent ni l'adresse IP, ni les ports, ni les capacités multimédias (codecs) de l'autre.
+Nous avons donc mis en place un **Serveur de Signalisation** utilisant **Node.js** et **Socket.io**. Son rôle est uniquement de relayer les messages administratifs (SDP Offer, Answer, ICE Candidates) avant que la connexion directe ne soit établie.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{imgs/webrtc_seq.png}
+    \caption{Diagramme de séquence : Processus de Signalisation et Handshake}
+\end{figure}
+
+\section{Traversée des NAT (STUN/TURN)}
+La majorité des utilisateurs se trouvent derrière des routeurs NAT (Network Address Translation). Pour qu'un pair puisse être joint, il doit connaître son adresse IP publique.
+Nous avons configuré l'objet \texttt{RTCPeerConnection} avec un serveur **STUN** (celui de Google : \texttt{stun:stun.l.google.com:19302}). Le serveur STUN renvoie au pair son adresse IP publique et son port, permettant la création de candidats ICE (\textit{Interactive Connectivity Establishment}).
+
+\chapter{Implémentation de la Solution}
+
+\section{Serveur de Signalisation (Socket.io)}
+Le serveur gère des "salles" (Rooms). Lorsqu'un client se connecte, il crée une salle ou rejoint une salle existante.
+
+\begin{lstlisting}[language=JavaScript, caption=Gestion des salles côté Serveur]
+socket.on('create or join', (room) => {
+    const myRoom = io.sockets.adapter.rooms.get(room) || { size: 0 };
+    const numClients = myRoom.size;
+
+    if (numClients === 0) {
+        socket.join(room);
+        socket.emit('created', room);
+    } else if (numClients === 1) {
+        io.sockets.in(room).emit('join', room);
+        socket.join(room);
+        // Signal au createur qu'il peut lancer l'offre
+        io.sockets.in(room).emit('ready'); 
+    } else { 
+        socket.emit('full', room); // Limite a 2 pour le P2P simple
+    }
+});
+\end{lstlisting}
+
+\section{Capture Média et Initialisation}
+L'API \texttt{navigator.mediaDevices.getUserMedia} est utilisée pour obtenir les flux. Nous utilisons les promesses (Async/Await) pour une syntaxe moderne et propre.
+
+\begin{lstlisting}[language=JavaScript, caption=Capture vidéo locale]
+async function startCapture() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true
+        });
+        localVideo.srcObject = stream;
+        localStream = stream;
+        // Connexion au serveur de signalisation
+        socket.emit('create or join', room);
+    } catch (e) {
+        console.error('Erreur acces camera', e);
+    }
+}
+\end{lstlisting}
+
+\section{Établissement du P2P et DataChannel}
+C'est le cœur de l'application (Extension 1). L'initiateur crée une offre SDP et un canal de données.
+
+\begin{lstlisting}[language=JavaScript, caption=Création de l'offre et du DataChannel]
+function createPeerConnection() {
+    rtcPeerConnection = new RTCPeerConnection(rtcConfig);
+    
+    // Gestion des candidats reseau (ICE)
+    rtcPeerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            socket.emit('message', { type: 'candidate', candidate: event.candidate });
+        }
+    };
+
+    // Reception du flux distant
+    rtcPeerConnection.ontrack = (event) => {
+        remoteVideo.srcObject = event.streams[0];
+    };
+
+    // Ajout du flux local
+    localStream.getTracks().forEach(track => rtcPeerConnection.addTrack(track, localStream));
+}
+
+// Creation du canal de chat (DataChannel)
+function createDataChannel() {
+    dataChannel = rtcPeerConnection.createDataChannel("chat");
+    dataChannel.onmessage = (event) => {
+        appendMessage("Pair: " + event.data);
+    };
+}
+\end{lstlisting}
+
+\chapter{Extensions et Analyse}
+
+\section{Extension 2 : Alternatives à Socket.io}
+Dans ce TP, nous avons utilisé \textbf{Socket.io}. Bien que très pratique (gestion automatique des déconnexions, notion de "rooms"), ce n'est pas la seule solution.
+\begin{itemize}
+    \item \textbf{WebSocket Natif (ws) :} Plus léger, standardisé par le W3C, mais nécessite de réimplémenter la logique de reconnexion et de broadcast manuellement.
+    \item \textbf{XHR / SSE :} On pourrait utiliser des requêtes HTTP (Polling) ou Server-Sent Events, mais la latence serait trop élevée pour une mise en relation rapide nécessaire au WebRTC.
+\end{itemize}
+
+\section{Extension 3 : Implémentation Générique}
+Pour rendre l'application adaptable à n'importe quel environnement réseau (notamment les réseaux d'entreprise bloquants), il est nécessaire d'externaliser la configuration ICE.
+Une implémentation générique chargerait un fichier \texttt{config.json} au démarrage contenant la liste des serveurs STUN et TURN. Cela permettrait à l'utilisateur de spécifier ses propres identifiants TURN sans modifier le code source JavaScript.
+
+\section{Extension 4 : Mode Vidéoconférence (Multipartites)}
+Notre implémentation actuelle est une topologie **Mesh** (Maillage complet) : chaque pair se connecte à tous les autres.
+\begin{itemize}
+    \item \textbf{Problème :} Si $N$ utilisateurs sont connectés, chaque utilisateur doit gérer $N-1$ flux montants et descendants. Pour 5 utilisateurs, cela sature rapidement le CPU et la bande passante du client.
+    \item \textbf{Solution (SFU/MCU) :} Pour passer à l'échelle, il faut utiliser une architecture centralisée.
+    \begin{itemize}
+        \item \textbf{SFU (Selective Forwarding Unit) :} Le client envoie un seul flux au serveur, qui le duplique vers les autres participants (Architecture utilisée par Jitsi, Google Meet).
+        \item \textbf{MCU (Multipoint Control Unit) :} Le serveur mixe tous les flux en une seule vidéo composite (Plus lourd pour le serveur, mais très léger pour le client).
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{imgs/webrtc_arch.png}
+    \caption{Comparaison Architecture Mesh (TP) vs SFU (Production)}
+\end{figure}
+
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+
+Ce TP a permis de démystifier la complexité apparente du WebRTC. Nous avons réussi à implémenter une communication vidéo et textuelle totalement P2P, sécurisée (DTLS/SRTP par défaut) et performante.
+
+Les points clés retenus sont :
+\begin{enumerate}
+    \item La distinction claire entre la **signalisation** (qui passe par le serveur) et le **média** (qui passe en direct).
+    \item L'importance cruciale du protocole **ICE** et des serveurs STUN pour traverser les routeurs domestiques.
+    \item La puissance de l'API **RTCDataChannel** qui permet de créer des applications temps réel (jeux, partage de fichiers) au-delà de la simple visioconférence.
+\end{enumerate}
+
+\end{document}
