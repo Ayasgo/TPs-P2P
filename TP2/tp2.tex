@@ -1,21 +1,211 @@
-Partie 1 : Installation (La "Valise")
-Créez un dossier tp_node et ouvrez votre terminal dedans.
+\documentclass[a4paper,12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
 
-Initialisation : npm init -y
+% Configuration des marges
+\geometry{hmargin=2.5cm,vmargin=2.5cm}
 
-Installation des outils (Extensions 2, 4, 6) :
+% Couleurs pour le code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
-Bash
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
 
-npm install express mongoose socket.io multer cors
-express : Framework web (remplace le code lourd de routing).
+% En-têtes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textbf{INE3 : Communication P2P}}
+\rhead{Rapport de TP2 : NodeJS}
+\cfoot{\thepage}
 
-mongoose : Pour parler à MongoDB.
+\begin{document}
 
-socket.io : Pour le temps réel.
+%===========================================================
+% PAGE DE GARDE
+%===========================================================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    \includegraphics[width=0.4\textwidth]{logo_inpt.png} 
+    
+    \vspace{2cm}
+    
+    {\Large \textbf{Institut National des Postes et Télécommunications}}\\[1.5cm]
+    
+    {\Large \textbf{Module : Communication P2P en temps réel sur le web}}\\[0.5cm]
+    {\huge \textbf{Rapport de TP2 : La Plateforme NodeJS}}\\[0.5cm]
+    {\large \textit{Développement d'une application temps réel avec la stack MEAN}}\\[2cm]
+    
+    \textbf{Réalisé par :}\\
+    Votre NOM Prénom\\[2cm]
+    
+    \textbf{Encadré par :}\\
+    Nom du Professeur\\[2cm]
+    
+    \vfill
+    {\large Année Universitaire : 2024-2025}
+\end{titlepage}
 
-multer : Pour gérer l'upload d'images.
+\tableofcontents
+\newpage
 
-Partie 2 : Le Code "All-in-One" (Extensions 1, 2, 4, 6)
-Plutôt que de faire 50 fichiers, voici une implémentation robuste qui couvre le routage (Express), la base de données (Mongoose), l'upload, et la logique métier.
+%===========================================================
+% INTRODUCTION
+%===========================================================
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
 
+L'objectif de ce TP est de maîtriser les concepts du développement web moderne axé sur la performance et le temps réel, en utilisant la plateforme **Node.js**. Contrairement aux modèles bloquants traditionnels (comme vu précédemment avec les Servlets Java), Node.js utilise un modèle d'entrées/sorties non bloquant piloté par les événements.
+
+Dans ce travail pratique, nous avons développé une application web complète permettant l'authentification, l'upload de fichiers, l'exploration du système de fichiers serveur et la communication temps réel. 
+
+Pour répondre aux exigences professionnelles actuelles et aux extensions demandées, nous avons directement adopté une architecture modulaire basée sur des frameworks robustes : **Express** pour le routage, **Mongoose** pour la base de données, et **Socket.io** pour le temps réel.
+
+\chapter{Environnement et Architecture}
+
+\section{La Plateforme Node.js}
+Node.js est un environnement d'exécution JavaScript construit sur le moteur V8 de Chrome. Il permet d'utiliser JavaScript côté serveur. Son gestionnaire de paquets, **NPM** (Node Package Manager), nous a permis d'installer les dépendances nécessaires à notre projet modulaire.
+
+\section{Modules Utilisés (Dépendances)}
+Pour éviter de réinventer la roue et pour assurer la maintenabilité du code (Extension 4 et 6), nous avons utilisé les bibliothèques suivantes :
+
+\begin{itemize}
+    \item \textbf{express} : Framework web minimaliste pour gérer les routes HTTP et les middlewares.
+    \item \textbf{mongoose} : Bibliothèque de modélisation d'objets (ODM) pour MongoDB.
+    \item \textbf{socket.io} : Bibliothèque permettant la communication bidirectionnelle temps réel (WebSockets).
+    \item \textbf{multer} : Middleware pour la gestion des données \texttt{multipart/form-data}, utilisé ici pour l'upload de fichiers.
+    \item \textbf{cors} : Pour gérer les autorisations d'accès entre différentes origines (Cross-Origin Resource Sharing).
+\end{itemize}
+
+\chapter{Implémentation de la Solution}
+
+\section{Configuration du Serveur et Base de Données}
+Nous avons mis en place un serveur HTTP unique qui délègue le routage à Express et la gestion temps réel à Socket.io. La connexion à la base de données NoSQL MongoDB est assurée par Mongoose.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{code_mongo.png}
+    \caption{Initialisation de MongoDB et définition du Schema User}
+\end{figure}
+
+Le schéma de données \texttt{UserSchema} définit la structure des documents utilisateurs (login, password, nom, prénom, dernière image uploadée).
+
+\section{Gestion du Routage (Express)}
+Au lieu d'utiliser les modules natifs \texttt{http} et \texttt{url} qui nécessitent un parsing manuel complexe des URLs, nous avons intégré le Framework **Express** (Extension 4). Cela permet de définir des routes claires pour chaque verbe HTTP (GET, POST).
+
+\subsection{Service d'Authentification (Login)}
+Le service \texttt{/login} vérifie l'existence de l'utilisateur dans MongoDB. Si l'utilisateur n'existe pas, il est créé à la volée (simplification pour le TP).
+
+\subsection{Service Upload et Show}
+Le service d'upload utilise \texttt{Multer} pour stocker l'image sur le disque serveur et met à jour le champ \texttt{lastImage} de l'utilisateur en base de données.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{code_routes.png}
+    \caption{Implémentation des routes Express (Login, Upload, Find)}
+\end{figure}
+
+\section{Communication Temps Réel (Socket.io)}
+Pour l'extension 2, nous avons migré une partie de la communication vers **Socket.io**. Contrairement aux requêtes HTTP classiques (Request-Response), le WebSocket permet au serveur de pousser ("push") des données vers le client instantanément.
+
+\begin{lstlisting}[language=JavaScript, caption=Logique Serveur Socket.io]
+io.on('connection', (socket) => {
+    console.log('Client connecté via WebSocket');
+    
+    socket.on('chat_message', (msg) => {
+        // Broadcast du message a tous les clients connectes
+        io.emit('chat_message', msg);
+    });
+});
+\end{lstlisting}
+
+\chapter{Extensions et Conception (UML \& MEAN)}
+
+\section{Architecture MEAN Stack}
+L'extension 3 demande l'architecture d'une application MEAN. C'est une solution "Full JavaScript" composée de :
+\begin{itemize}
+    \item \textbf{M}ongoDB : Base de données NoSQL (Stockage JSON).
+    \item \textbf{E}xpress : Framework Backend (API REST).
+    \item \textbf{A}ngular : Framework Frontend (Single Page Application).
+    \item \textbf{N}ode.js : Serveur d'application.
+\end{itemize}
+
+
+
+[Image of MEAN stack architecture diagram]
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{mean_arch.png}
+    \caption{Architecture MEAN Stack}
+\end{figure}
+
+\section{Diagrammes UML}
+
+\subsection{Diagramme de Cas d'Utilisation}
+L'utilisateur interagit avec le système pour s'authentifier, uploader des fichiers et visualiser le contenu.
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{uml_usecase.png}
+    \caption{Diagramme de Cas d'Utilisation}
+\end{figure}
+
+\subsection{Diagramme de Séquence (Upload)}
+Le diagramme suivant illustre le flux de données lors d'un upload d'image, impliquant le Client, le Serveur (Express) et la Base de Données (MongoDB).
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{uml_sequence.png}
+    \caption{Diagramme de Séquence : Scénario Upload}
+\end{figure}
+
+\chapter{Synthèse des Acquis}
+
+Ce TP a permis de consolider notre compréhension des architectures web asynchrones. Voici les points clés retenus :
+
+\begin{itemize}
+    \item \textbf{Programmation Non-Bloquante :} L'avantage majeur de Node.js est sa capacité à gérer des milliers de connexions simultanées grâce à l'Event Loop, sans créer un thread par utilisateur (contrairement aux modèles classiques).
+    
+    \item \textbf{Full Stack JavaScript :} L'utilisation du même langage (JS) pour le frontend, le backend et la manipulation de base de données (objets JSON dans MongoDB) simplifie énormément le développement et réduit la charge cognitive ("Context Switching").
+    
+    \item \textbf{WebSockets vs HTTP :} Nous avons distingué le rôle de HTTP (chargement de ressources, actions statiques) de celui des WebSockets (chats, notifications temps réel), comprenant que les applications modernes sont souvent hybrides.
+    
+    \item \textbf{Frameworks Modernes :} L'intégration d'Express et Mongoose a démontré comment l'écosystème Node.js permet de développer rapidement des APIs RESTful robustes et maintenables.
+\end{itemize}
+
+\end{document}
