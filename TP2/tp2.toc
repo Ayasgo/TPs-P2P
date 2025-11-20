@@ -1,0 +1,17 @@
+\babel@toc {french}{}\relax 
+\contentsline {chapter}{Introduction}{2}{chapter*.2}%
+\contentsline {chapter}{\numberline {1}Environnement et Architecture}{3}{chapter.1}%
+\contentsline {section}{\numberline {1.1}La Plateforme Node.js}{3}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Modules Utilisés (Dépendances)}{3}{section.1.2}%
+\contentsline {chapter}{\numberline {2}Implémentation de la Solution}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Configuration du Serveur et Base de Données}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Gestion du Routage (Express)}{5}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Service d'Authentification (Login)}{5}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Service Upload et Show}{5}{subsection.2.2.2}%
+\contentsline {section}{\numberline {2.3}Communication Temps Réel (Socket.io)}{7}{section.2.3}%
+\contentsline {chapter}{\numberline {3}Extensions et Conception (UML \& MEAN)}{8}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Architecture MEAN Stack}{8}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Diagrammes UML}{8}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Diagramme de Cas d'Utilisation}{8}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Diagramme de Séquence (Upload)}{9}{subsection.3.2.2}%
+\contentsline {chapter}{\numberline {4}Synthèse des Acquis}{10}{chapter.4}%
