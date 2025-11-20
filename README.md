@@ -11,8 +11,6 @@ L'objectif de ces projets est d'explorer les architectures web modernes, du prot
 ![WebRTC](https://img.shields.io/badge/WebRTC-333333?style=for-the-badge&logo=webrtc&logoColor=white)
 
 ## 📂 Structure du Dépôt
-
-```text
 .
 ├── TP1/      # TP1 : Les Servlets HTTP (Implémentation Python Flask)
 ├── TP2/     # TP2 : Architecture Node.js & MEAN Stack
