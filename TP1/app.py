@@ -63,18 +63,16 @@ def loterie():
     conn.commit()
     conn.close()
 
-    # Construction de la réponse (Équivalent de out.println)
-    # Note: En Python moderne, on utilise des f-strings pour insérer les variables
-    html_response = f"""
-    <html>
-    <body>
-        <h1>Greetings {nom_prenom}!</h1>
-        <p>Vous avez gagné: <b>{gain}</b> millions de dollars!</p>
-        <a href="/">Rejouer</a>
-    </body>
-    </html>
-    """
-    return html_response
+    return render_template('resultat.html', nom=nom_prenom, gain=gain)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "<h1>Oups ! Page introuvable (Erreur 404)</h1>", 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return "<h1>Le serveur a planté ! (Erreur 500)</h1>", 500
 
 if __name__ == '__main__':
     # Lancement du serveur (Équivalent du démarrage de Tomcat)
